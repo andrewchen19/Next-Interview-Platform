@@ -1,7 +1,14 @@
+import NavBar from "@/components/NavBar";
+
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return (
+    <div className="root-layout">
+      <NavBar />
+      {children}
+    </div>
+  );
 }
