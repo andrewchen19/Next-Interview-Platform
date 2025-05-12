@@ -16,7 +16,8 @@ const normalizeTechName = (tech: string) => {
 const checkIconExists = async (url: string) => {
   try {
     const response = await fetch(url, { method: "HEAD" });
-    return response.ok; // Returns true if the icon exists
+    // returns true if the icon exists
+    return response.ok;
   } catch {
     return false;
   }
