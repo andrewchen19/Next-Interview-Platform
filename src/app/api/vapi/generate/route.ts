@@ -12,7 +12,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const { type, level, role, techstack, userid, amount } = await request.json();
+  const { type, level, role, techStack, userid, amount } = await request.json();
 
   try {
     // gemini generate questions based on the info we passed to it
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
       prompt: `Prepare questions for a job interview.
         The job role is ${role}.
         The job experience level is ${level}.
-        The tech stack used in the job is: ${techstack}.
+        The tech stack used in the job is: ${techStack}.
         The focus between behavioural and technical questions should lean towards: ${type}.
         The amount of questions required is: ${amount}.
         Please return only the questions, without any additional text.
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
       type,
       level,
       role,
-      techStack: techstack.split(","),
+      techStack: techStack.split(","),
       questions: JSON.parse(questions),
       userId: userid,
       finalized: true,
