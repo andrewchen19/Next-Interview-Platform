@@ -1,9 +1,11 @@
 "use client";
 
+// client-side form
 import { useForm } from "react-hook-form";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,16 +17,26 @@ import { toast } from "sonner";
 // custom form field
 import FormField from "./FormField";
 
+import { auth } from "@/firebase/client";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
+import { signIn, signUp } from "@/actions/auth.action";
+import { FirebaseError } from "firebase/app";
+
 // Define the shape of your form
 const authFormSchema = (type: FormType) => {
   return z.object({
     name: type === "sign-up" ? z.string().min(3) : z.string().optional(),
     email: z.string().email(),
-    password: z.string().min(5),
+    password: z.string().min(6),
   });
 };
 
 export default function AuthForm({ type }: { type: FormType }) {
+  const [isLoading, setIsLoading] = useState(false);
+
   const router = useRouter();
 
   const formSchema = authFormSchema(type);
@@ -40,17 +52,80 @@ export default function AuthForm({ type }: { type: FormType }) {
   });
 
   // 2. Define a submit handler
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsLoading(true);
+
     try {
       if (type === "sign-up") {
-        toast.success("Account created Successfully. Please sign in.");
+        const { name, email, password } = values;
+
+        // create a new user
+        const userCredential = await createUserWithEmailAndPassword(
+          auth,
+          email,
+          password
+        );
+
+        const result = await signUp({
+          //  new user's unique Firebase UID
+          uid: userCredential.user.uid,
+          // non-null assertion
+          name: name!,
+          email,
+        });
+
+        if (!result.success) {
+          toast.error(result.message);
+          return;
+        }
+
+        toast.success(result.message);
         router.push("/sign-in");
       } else {
-        toast.success("Sign in Successfully.");
+        const { email, password } = values;
+
+        const userCredential = await signInWithEmailAndPassword(
+          auth,
+          email,
+          password
+        );
+
+        const idToken = await userCredential.user.getIdToken();
+
+        if (!idToken) {
+          toast.error("Sign in failed.");
+          return;
+        }
+
+        const result = await signIn({
+          email,
+          idToken,
+        });
+
+        if (!result.success) {
+          toast.error(result.message);
+          return;
+        }
+
+        toast.success(result.message);
         router.push("/");
       }
-    } catch (error) {
-      toast.error(`There was an error: ${error}`);
+    } catch (error: unknown) {
+      // handle firebase specific errors
+      if (error instanceof FirebaseError) {
+        if (error.code === "auth/email-already-in-use") {
+          return toast.error("Email is already in use.");
+        }
+        if (error.code === "auth/invalid-credential") {
+          return toast.error("Invalid credential.");
+        }
+
+        return toast.error(error.message);
+      }
+
+      toast.error("There was an error. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -94,8 +169,8 @@ export default function AuthForm({ type }: { type: FormType }) {
               type="password"
             />
 
-            <Button type="submit" className="btn">
-              {isSignIn ? "Sign in" : "Sign up"}
+            <Button type="submit" className="btn" disabled={isLoading}>
+              {isLoading ? "Loading..." : isSignIn ? "Sign in" : "Sign up"}
             </Button>
           </form>
         </Form>
