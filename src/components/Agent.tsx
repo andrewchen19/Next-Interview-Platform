@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 import { vapi } from "@/lib/vapi.sdk";
+import { interviewer } from "@/constants";
 
 enum CallStatus {
   INACTIVE = "INACTIVE",
@@ -19,12 +20,67 @@ interface SavedMessage {
   content: string;
 }
 
-export default function Agent({ userName, userId, type }: AgentProps) {
+export default function Agent({
+  userName,
+  userId,
+  type,
+  interviewId,
+  questions,
+}: AgentProps) {
   const router = useRouter();
 
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [callStatus, setCallStatus] = useState(CallStatus.INACTIVE);
   const [messages, setMessages] = useState<SavedMessage[]>([]);
+  const [latestMessage, setLatestMessage] = useState<string>("");
+
+  const handleCallStart = async () => {
+    setCallStatus(CallStatus.CONNECTING);
+
+    if (type === "generate") {
+      const assistantOverrides = {
+        variableValues: {
+          username: userName,
+          userid: userId,
+        },
+        // necessary, even if you’re not using them
+        clientMessages: [],
+        serverMessages: [],
+      };
+
+      // tell vapi to start the call
+      // collecting all data we need according to the work flow
+      await vapi.start(
+        process.env.NEXT_PUBLIC_VAPI_WORK_FLOW_ID as string,
+        assistantOverrides
+      );
+    } else {
+      let formattedQuestions = "";
+
+      if (questions) {
+        formattedQuestions = questions.map((q) => `- ${q}`).join("\n");
+      }
+
+      const assistantOverrides = {
+        variableValues: {
+          questions: formattedQuestions,
+        },
+        // necessary, even if you’re not using them
+        clientMessages: [],
+        serverMessages: [],
+      };
+
+      // tell vapi to start the call
+      //
+      await vapi.start(interviewer, assistantOverrides);
+    }
+  };
+  const handleDisconnectCall = async () => {
+    setCallStatus(CallStatus.FINISHED);
+
+    // tell vapi to stop the call
+    await vapi.stop();
+  };
 
   // all these functions define what happen at different stages of the call
   // you can think these as vapi event listeners
@@ -65,38 +121,37 @@ export default function Agent({ userName, userId, type }: AgentProps) {
   }, []);
 
   useEffect(() => {
-    if (callStatus === CallStatus.FINISHED) {
-      router.push("/");
+    if (messages.length > 0) {
+      setLatestMessage(messages[messages.length - 1].content);
     }
-  }, [messages, callStatus, type, userId, router]);
 
-  const handleCallStart = async () => {
-    setCallStatus(CallStatus.CONNECTING);
+    const handleGenerateFeedback = async (messages: SavedMessage[]) => {
+      console.log("generate feedback");
 
-    const assistantOverrides = {
-      variableValues: {
-        username: userName,
-        userid: userId,
-      },
-      // necessary, even if you’re not using them
-      clientMessages: [],
-      serverMessages: [],
+      console.log(messages);
+
+      // TODO : create a server actions
+      const { success, id } = {
+        success: true,
+        id: "feedback-id",
+      };
+
+      if (success && id) {
+        router.push(`/interview/${interviewId}/feedback/`);
+      } else {
+        console.log("failed to generate feedback");
+        router.push("/");
+      }
     };
 
-    // tell vapi to start the call
-    await vapi.start(
-      process.env.NEXT_PUBLIC_VAPI_WORK_FLOW_ID as string,
-      assistantOverrides
-    );
-  };
-  const handleDisconnectCall = async () => {
-    setCallStatus(CallStatus.FINISHED);
-
-    // tell vapi to stop the call
-    await vapi.stop();
-  };
-
-  const latestMessage = messages[messages.length - 1]?.content;
+    if (callStatus === CallStatus.FINISHED) {
+      if (type === "generate") {
+        router.push("/");
+      } else {
+        handleGenerateFeedback(messages);
+      }
+    }
+  }, [messages, callStatus, type, userId, router, interviewId]);
 
   return (
     <>
