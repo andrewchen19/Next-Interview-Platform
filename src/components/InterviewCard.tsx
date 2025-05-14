@@ -6,12 +6,12 @@ import { Button } from "./ui/button";
 import DisplayTechIcons from "./DisplayTechIcons";
 
 export default function InterviewCard({
-  interviewId,
+  id,
   role,
   type,
   techStack,
   createdAt,
-}: InterviewCardProps) {
+}: Interview) {
   const feedback = null as Feedback | null;
 
   // regex -> g is for global (searches the entire string) & i is for case sensitive
@@ -70,9 +70,7 @@ export default function InterviewCard({
             <Button asChild className="btn-primary">
               <Link
                 href={
-                  feedback
-                    ? `/interview/${interviewId}/feedback`
-                    : `/interview/${interviewId}`
+                  feedback ? `/interview/${id}/feedback` : `/interview/${id}`
                 }
               >
                 {feedback ? "Check feedback" : "View interview"}
