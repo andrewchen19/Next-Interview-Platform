@@ -38,22 +38,13 @@ interface User {
   email: string;
 }
 
-interface InterviewCardProps {
-  interviewId?: string;
-  userId?: string;
-  role: string;
-  type: string;
-  techStack: string[];
-  createdAt?: string;
-}
-
 interface AgentProps {
   userName: string;
   userId: string;
-  interviewId?: string;
-  feedbackId?: string;
   type: "generate" | "interview";
+  interviewId?: string;
   questions?: string[];
+  feedbackId?: string;
 }
 
 interface RouteParams {
