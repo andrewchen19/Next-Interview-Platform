@@ -1,5 +1,11 @@
-import { cn } from "@/lib/utils";
+"use client";
+
+import { useEffect, useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+
+import { cn } from "@/lib/utils";
+import { vapi } from "@/lib/vapi.sdk";
 
 enum CallStatus {
   INACTIVE = "INACTIVE",
@@ -8,11 +14,89 @@ enum CallStatus {
   FINISHED = "FINISHED",
 }
 
-export default function Agent({ userName }: AgentProps) {
-  const isSpeaking = true;
-  const callStatus = "CONNECTING" as CallStatus;
-  const messages = ["What's your name?", "My name is Andrew."];
-  const lastMessage = messages[messages.length - 1];
+interface SavedMessage {
+  role: "user" | "system" | "assistant";
+  content: string;
+}
+
+export default function Agent({ userName, userId, type }: AgentProps) {
+  const router = useRouter();
+
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [callStatus, setCallStatus] = useState(CallStatus.INACTIVE);
+  const [messages, setMessages] = useState<SavedMessage[]>([]);
+
+  // all these functions define what happen at different stages of the call
+  // you can think these as vapi event listeners
+  useEffect(() => {
+    const onCallStart = () => setCallStatus(CallStatus.ACTIVE);
+    const onCallEnd = () => setCallStatus(CallStatus.FINISHED);
+
+    const onMessage = (message: Message) => {
+      if (message.type === "transcript" && message.transcriptType === "final") {
+        const newMessage = { role: message.role, content: message.transcript };
+        setMessages((prev) => [...prev, newMessage]);
+      }
+    };
+
+    const onSpeechStart = () => setIsSpeaking(true);
+    const onSpeechEnd = () => setIsSpeaking(false);
+
+    const onError = (error: Error) => {
+      console.log(error);
+    };
+
+    vapi.on("call-start", onCallStart);
+    vapi.on("call-end", onCallEnd);
+    vapi.on("message", onMessage);
+    vapi.on("speech-start", onSpeechStart);
+    vapi.on("speech-end", onSpeechEnd);
+    vapi.on("error", onError);
+
+    // clean up function
+    return () => {
+      vapi.off("call-start", onCallStart);
+      vapi.off("call-end", onCallEnd);
+      vapi.off("message", onMessage);
+      vapi.off("speech-start", onSpeechStart);
+      vapi.off("speech-end", onSpeechEnd);
+      vapi.off("error", onError);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (callStatus === CallStatus.FINISHED) {
+      router.push("/");
+    }
+  }, [messages, callStatus, type, userId, router]);
+
+  const handleCallStart = async () => {
+    setCallStatus(CallStatus.CONNECTING);
+
+    const assistantOverrides = {
+      variableValues: {
+        username: userName,
+        userid: userId,
+      },
+      // necessary, even if you’re not using them
+      clientMessages: [],
+      serverMessages: [],
+    };
+
+    // tell vapi to start the call
+    await vapi.start(
+      process.env.NEXT_PUBLIC_VAPI_WORK_FLOW_ID as string,
+      assistantOverrides
+    );
+  };
+  const handleDisconnectCall = async () => {
+    setCallStatus(CallStatus.FINISHED);
+
+    // tell vapi to stop the call
+    await vapi.stop();
+  };
+
+  const latestMessage = messages[messages.length - 1]?.content;
 
   return (
     <>
@@ -28,7 +112,7 @@ export default function Agent({ userName }: AgentProps) {
             />
             {isSpeaking && <span className="animate-speak" />}
           </div>
-          <h3>AI Interviewer</h3>
+          <h3>{type === "generate" ? "AI Assistant" : "AI Interviewer"}</h3>
         </div>
 
         <div className="card-border">
@@ -50,13 +134,13 @@ export default function Agent({ userName }: AgentProps) {
         <div className="transcript-border">
           <div className="transcript">
             <p
-              key={lastMessage}
+              key={latestMessage}
               className={cn(
                 "transition-opacity duration-500 opacity-0",
                 "animate-fadeIn opacity-100"
               )}
             >
-              {lastMessage}
+              {latestMessage}
             </p>
           </div>
         </div>
@@ -65,7 +149,7 @@ export default function Agent({ userName }: AgentProps) {
       {/* button */}
       <div className="w-fll flex justify-center">
         {callStatus !== CallStatus.ACTIVE ? (
-          <button className="relative btn-call">
+          <button className="relative btn-call" onClick={handleCallStart}>
             <span
               className={cn(
                 "absolute animate-ping rounded-full opacity-75",
@@ -78,7 +162,9 @@ export default function Agent({ userName }: AgentProps) {
             </span>
           </button>
         ) : (
-          <button className="btn-disconnect">End</button>
+          <button className="btn-disconnect" onClick={handleDisconnectCall}>
+            End
+          </button>
         )}
       </div>
     </>
