@@ -10,9 +10,9 @@ export async function signUp(params: SignUpParams) {
   const { uid, name, email } = params;
 
   try {
-    const userRecord = await db.collection("users").doc(uid).get();
+    const userRef = await db.collection("users").doc(uid).get();
 
-    if (userRecord.exists) {
+    if (userRef.exists) {
       return {
         success: false,
         message: "User already exists. Please sign in.",
@@ -109,16 +109,13 @@ export async function getCurrentUser(): Promise<User | null> {
     // if valid, returns the user's decoded information
     const decodedClaims = await auth.verifySessionCookie(sessionCookie, true);
 
-    const userRecord = await db
-      .collection("users")
-      .doc(decodedClaims.uid)
-      .get();
+    const userRef = await db.collection("users").doc(decodedClaims.uid).get();
 
-    if (!userRecord.exists) return null;
+    if (!userRef.exists) return null;
 
     return {
-      id: userRecord.id,
-      ...userRecord.data(),
+      id: userRef.id,
+      ...userRef.data(),
     } as User;
   } catch {
     return null;
