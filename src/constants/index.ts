@@ -95,6 +95,7 @@ export const mappings = {
   netlify: "netlify",
   vercel: "vercel",
   "aws amplify": "amplify",
+  java: "java",
 };
 
 // export const interviewer: CreateAssistantDTO = {
