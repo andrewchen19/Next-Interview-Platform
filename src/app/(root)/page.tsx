@@ -1,11 +1,29 @@
 import Link from "next/link";
+import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
-import { mockInterviews } from "@/constants";
-import InterviewCard from "@/components/InterviewCard";
 
-export default function HomePage() {
+// import { mockInterviews } from "@/constants";
+import InterviewCard from "@/components/InterviewCard";
+import { getCurrentUser } from "@/actions/auth.action";
+import {
+  getInterviewsByUserId,
+  getOthersInterviews,
+} from "@/actions/interview.action";
+
+export default async function HomePage() {
+  const user = await getCurrentUser();
+
+  // use Promise.all to run them concurrently
+  const [interviews, othersInterviews] = await Promise.all([
+    getInterviewsByUserId(user?.id as string),
+    getOthersInterviews({ userId: user?.id as string }),
+  ]);
+
+  const hasMyInterviews = !!interviews && interviews?.length > 0;
+  const hasOthersInterviews =
+    !!othersInterviews && othersInterviews?.length > 0;
+
   return (
     <>
       <section className="card-cta">
@@ -14,7 +32,7 @@ export default function HomePage() {
           <p>Practice real interview questions & get instant feedback.</p>
 
           <Button asChild className="btn-primary max-sm:w-full">
-            <Link href={"/interview"}>Start an interview</Link>
+            <Link href={"/interview"}>Create an interview</Link>
           </Button>
         </div>
 
@@ -28,26 +46,30 @@ export default function HomePage() {
       </section>
 
       <section className="flex flex-col gap-6 mt-8">
-        <h2>Your Interviews</h2>
+        <h2>Your own interviews</h2>
 
         <div className="interviews-section">
-          {/* <p>You haven&apos;t take any interview yet</p> */}
-
-          {mockInterviews.map((interview) => (
-            <InterviewCard key={interview.id} {...interview} />
-          ))}
+          {hasMyInterviews ? (
+            interviews.map((interview) => (
+              <InterviewCard key={interview.id} {...interview} />
+            ))
+          ) : (
+            <p>You haven&apos;t create any interview yet. Create it now.</p>
+          )}
         </div>
       </section>
 
       <section className="flex flex-col gap-6 mt-8">
-        <h2>Take an interview</h2>
+        <h2>Take others interviews</h2>
 
         <div className="interviews-section">
-          {/* <p>There are no interviews available</p> */}
-
-          {mockInterviews.map((interview) => (
-            <InterviewCard key={interview.id} {...interview} />
-          ))}
+          {hasOthersInterviews ? (
+            othersInterviews.map((interview) => (
+              <InterviewCard key={interview.id} {...interview} />
+            ))
+          ) : (
+            <p>There are no interviews available</p>
+          )}
         </div>
       </section>
     </>
