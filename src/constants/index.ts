@@ -57,7 +57,6 @@ export const mappings = {
   "backbone.js": "backbone",
   backbonejs: "backbone",
   backbone: "backbone",
-  nestjs: "nestjs",
   graphql: "graphql",
   "graph ql": "graphql",
   apollo: "apollo",
@@ -96,6 +95,9 @@ export const mappings = {
   vercel: "vercel",
   "aws amplify": "amplify",
   java: "java",
+  flutter: "flutter",
+  ruby: "ruby",
+  swift: "swift",
 };
 
 // export const interviewer: CreateAssistantDTO = {
