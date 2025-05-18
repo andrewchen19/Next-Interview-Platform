@@ -4,15 +4,18 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "./ui/button";
 import DisplayTechIcons from "./DisplayTechIcons";
+import { getFeedback } from "@/actions/interview.action";
 
-export default function InterviewCard({
+export default async function InterviewCard({
   id,
+  userId,
   role,
   type,
   techStack,
   createdAt,
 }: Interview) {
-  const feedback = null as Feedback | null;
+  const feedback =
+    id && userId ? await getFeedback({ interviewId: id, userId }) : null;
 
   // regex -> g is for global (searches the entire string) & i is for case sensitive
   // checks whether the string type contains the word "mix"
