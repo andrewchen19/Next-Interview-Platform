@@ -49,7 +49,7 @@ export default function Agent({
       };
 
       // tell vapi to start the call
-      // collecting all data we need according to the work flow
+      // collecting interview info we need according to the work flow
       await vapi.start(
         process.env.NEXT_PUBLIC_VAPI_WORK_FLOW_ID as string,
         assistantOverrides
@@ -58,7 +58,9 @@ export default function Agent({
       let formattedQuestions = "";
 
       if (questions) {
-        formattedQuestions = questions.map((q) => `- ${q}`).join("\n");
+        formattedQuestions = questions
+          .map((question) => `- ${question}`)
+          .join("\n");
       }
 
       const assistantOverrides = {
@@ -71,10 +73,11 @@ export default function Agent({
       };
 
       // tell vapi to start the call
-      //
+      // collecting feedback we need according to the interview
       await vapi.start(interviewer, assistantOverrides);
     }
   };
+
   const handleDisconnectCall = async () => {
     setCallStatus(CallStatus.FINISHED);
 

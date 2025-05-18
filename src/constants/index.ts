@@ -101,6 +101,7 @@ export const mappings = {
   python: "python",
 };
 
+// assistant’s configuration
 export const interviewer: CreateAssistantDTO = {
   name: "Interviewer",
   firstMessage:
@@ -156,6 +157,7 @@ End the conversation on a polite and positive note.
       },
     ],
   },
+  // necessary, even if you’re not using them
   clientMessages: [],
   serverMessages: [],
 };
