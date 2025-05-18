@@ -52,12 +52,12 @@ interface RouteParams {
   searchParams: Promise<Record<string, string>>;
 }
 
-interface GetFeedbackByInterviewIdParams {
+interface GetFeedbackParams {
   interviewId: string;
   userId: string;
 }
 
-interface GetLatestInterviewsParams {
+interface GetOthersInterviewsParams {
   userId: string;
   limit?: number;
 }
