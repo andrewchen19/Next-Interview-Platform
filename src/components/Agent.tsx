@@ -44,9 +44,6 @@ export default function Agent({
           username: userName,
           userid: userId,
         },
-        // necessary, even if you’re not using them
-        clientMessages: [],
-        serverMessages: [],
       };
 
       // tell vapi to start the call
@@ -68,9 +65,6 @@ export default function Agent({
         variableValues: {
           questions: formattedQuestions,
         },
-        // necessary, even if you’re not using them
-        clientMessages: [],
-        serverMessages: [],
       };
 
       // tell vapi to start the call

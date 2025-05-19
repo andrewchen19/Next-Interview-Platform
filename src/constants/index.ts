@@ -157,9 +157,6 @@ End the conversation on a polite and positive note.
       },
     ],
   },
-  // necessary, even if you’re not using them
-  clientMessages: [],
-  serverMessages: [],
 };
 
 export const feedbackSchema = z.object({
