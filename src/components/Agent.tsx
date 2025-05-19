@@ -201,7 +201,7 @@ export default function Agent({
           <button className="relative btn-call" onClick={handleCallStart}>
             <span
               className={cn(
-                "absolute animate-ping rounded-full opacity-75",
+                "absolute inline-flex size-5/6 animate-ping rounded-full bg-success-100 opacity-75",
                 callStatus !== CallStatus.CONNECTING && "hidden"
               )}
             />
