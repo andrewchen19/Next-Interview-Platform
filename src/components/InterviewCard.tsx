@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button } from "./ui/button";
 import DisplayTechIcons from "./DisplayTechIcons";
 import { getFeedback } from "@/actions/interview.action";
+import { getCurrentUser } from "@/actions/auth.action";
 
 export default async function InterviewCard({
   id,
@@ -14,8 +15,14 @@ export default async function InterviewCard({
   techStack,
   createdAt,
 }: Interview) {
+  const user = await getCurrentUser();
+
+  const isCurrentUser = user?.id === userId;
+
   const feedback =
-    id && userId ? await getFeedback({ interviewId: id, userId }) : null;
+    id && userId && isCurrentUser
+      ? await getFeedback({ interviewId: id, userId })
+      : null;
 
   // regex -> g is for global (searches the entire string) & i is for case sensitive
   // checks whether the string type contains the word "mix"
