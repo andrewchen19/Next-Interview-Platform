@@ -127,3 +127,39 @@ export async function isAuthenticated() {
 
   return !!user;
 }
+
+export async function signOut() {
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get("sessionCookie")?.value;
+
+  if (!sessionCookie) {
+    return {
+      success: false,
+      message: "No active session found. You're already signed out.",
+    };
+  }
+
+  try {
+    // verify and decode the session cookie to get the UID
+    const decodedClaims = await auth.verifySessionCookie(sessionCookie);
+
+    // revoke the session cookie
+    await auth.revokeRefreshTokens(decodedClaims.uid);
+
+    // clear the cookie on client
+    cookieStore.set("sessionCookie", "", {
+      maxAge: 0,
+      path: "/",
+    });
+
+    return {
+      success: true,
+      message: "Signed out successfully.",
+    };
+  } catch {
+    return {
+      success: false,
+      message: "Failed to sign out. Please try again.",
+    };
+  }
+}
