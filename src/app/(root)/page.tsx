@@ -60,7 +60,7 @@ export default async function HomePage() {
       </section>
 
       <section className="flex flex-col gap-6 mt-8">
-        <h2>Take others interviews</h2>
+        <h2>Pick others interviews</h2>
 
         <div className="interviews-section">
           {hasOthersInterviews ? (
