@@ -35,7 +35,7 @@ export default async function Page({ params }: RouteParams) {
           <div className="flex flex-row gap-2 items-center">
             <Image src="/star.svg" width={22} height={22} alt="star" />
             <p>
-              Overall Impression:{" "}
+              Overall Impression:&nbsp;
               <span className="text-primary-200 font-bold">
                 {feedback?.totalScore}
               </span>
