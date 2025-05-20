@@ -1,3 +1,5 @@
+"use client";
+
 import { signOut } from "@/actions/auth.action";
 import { Button } from "./ui/button";
 import { toast } from "sonner";
