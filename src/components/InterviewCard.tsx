@@ -9,7 +9,6 @@ import { getCurrentUser } from "@/actions/auth.action";
 
 export default async function InterviewCard({
   id,
-  userId,
   role,
   type,
   techStack,
@@ -17,12 +16,10 @@ export default async function InterviewCard({
 }: Interview) {
   const user = await getCurrentUser();
 
-  const isCurrentUser = user?.id === userId;
+  const userId = user?.id as string;
 
   const feedback =
-    id && userId && isCurrentUser
-      ? await getFeedback({ interviewId: id, userId })
-      : null;
+    id && userId ? await getFeedback({ interviewId: id, userId }) : null;
 
   // regex -> g is for global (searches the entire string) & i is for case sensitive
   // checks whether the string type contains the word "mix"
