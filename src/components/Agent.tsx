@@ -34,6 +34,8 @@ export default function Agent({
   const [callStatus, setCallStatus] = useState(CallStatus.INACTIVE);
   const [messages, setMessages] = useState<SavedMessage[]>([]);
   const [latestMessage, setLatestMessage] = useState<string>("");
+  const [isFeedbackGenerating, setIsFeedbackGenerating] = useState(false);
+  const [shouldGenerateFeedback, setShouldGenerateFeedback] = useState(false);
 
   const handleCallStart = async () => {
     setCallStatus(CallStatus.CONNECTING);
@@ -136,16 +138,31 @@ export default function Agent({
         // failed to generate feedback
         router.push("/");
       }
+
+      setIsFeedbackGenerating(false);
     };
 
     if (callStatus === CallStatus.FINISHED) {
       if (type === "generate") {
         router.push("/");
       } else {
-        handleGenerateFeedback(messages);
+        setIsFeedbackGenerating(true);
+        setShouldGenerateFeedback(true);
       }
     }
-  }, [messages, callStatus, type, userId, router, interviewId]);
+
+    if (shouldGenerateFeedback) {
+      handleGenerateFeedback(messages);
+    }
+  }, [
+    messages,
+    callStatus,
+    type,
+    userId,
+    router,
+    interviewId,
+    shouldGenerateFeedback,
+  ]);
 
   return (
     <>
@@ -216,6 +233,15 @@ export default function Agent({
           </button>
         )}
       </div>
+
+      {/* mask */}
+      {isFeedbackGenerating && (
+        <div className="fixed inset-0 w-full h-full bg-black/50 z-10 flex justify-center items-center">
+          <p className="font-bold text-[30px] animate-pulse">
+            Feedback generating...
+          </p>
+        </div>
+      )}
     </>
   );
 }
