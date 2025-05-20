@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-export default async function Page({ params }: RouteParams) {
+export default async function InterviewFeedbackPage({ params }: RouteParams) {
   const { id } = await params;
 
   const user = await getCurrentUser();

@@ -7,7 +7,7 @@ import { getCurrentUser } from "@/actions/auth.action";
 import { getInterviewById } from "@/actions/interview.action";
 import DisplayTechIcons from "@/components/DisplayTechIcons";
 
-export default async function Page({ params }: RouteParams) {
+export default async function InterviewTakingPage({ params }: RouteParams) {
   const { id } = await params;
   const user = await getCurrentUser();
   const interview = await getInterviewById(id);

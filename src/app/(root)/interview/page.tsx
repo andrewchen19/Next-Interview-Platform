@@ -2,7 +2,7 @@ import Agent from "@/components/Agent";
 
 import { getCurrentUser } from "@/actions/auth.action";
 
-export default async function InterviewPage() {
+export default async function InterviewGenerationPage() {
   const user = await getCurrentUser();
 
   return (
