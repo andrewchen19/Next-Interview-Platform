@@ -134,7 +134,7 @@ export default function AuthForm({ type }: { type: FormType }) {
     setIsLoading(true);
 
     try {
-      const email = "rubychan@gmail.com";
+      const email = "aiscream@gmail.com";
       const password = "123456";
 
       const userCredential = await signInWithEmailAndPassword(
