@@ -213,7 +213,13 @@ export default function Agent({
       )}
 
       {/* button */}
-      <div className="w-fll flex justify-center">
+      <div className="w-fll flex justify-center gap-3">
+        <button className="btn-secondary" onClick={() => router.push("/")}>
+          <p className="text-sm font-semibold text-primary-200 text-center">
+            Back to dashboard
+          </p>
+        </button>
+
         {callStatus !== CallStatus.ACTIVE ? (
           <button className="relative btn-call" onClick={handleCallStart}>
             <span
