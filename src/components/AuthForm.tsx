@@ -41,7 +41,7 @@ export default function AuthForm({ type }: { type: FormType }) {
 
   const formSchema = authFormSchema(type);
 
-  // 1. Define your form
+  // define your form
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -51,7 +51,7 @@ export default function AuthForm({ type }: { type: FormType }) {
     },
   });
 
-  // 2. Define a submit handler
+  // define a submit handler
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
 
@@ -129,6 +129,54 @@ export default function AuthForm({ type }: { type: FormType }) {
     }
   }
 
+  // demo user
+  async function loginDemoUser() {
+    setIsLoading(true);
+
+    try {
+      const email = "rubychan@gmail.com";
+      const password = "123456";
+
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const idToken = await userCredential.user.getIdToken();
+
+      if (!idToken) {
+        toast.error("Sign in failed.");
+        return;
+      }
+
+      const result = await signIn({
+        email,
+        idToken,
+      });
+
+      if (!result.success) {
+        toast.error(result.message);
+        return;
+      }
+
+      toast.success(result.message);
+      router.push("/");
+    } catch (error: unknown) {
+      // handle firebase specific errors
+      if (error instanceof FirebaseError) {
+        if (error.code === "auth/invalid-credential") {
+          return toast.error("Invalid credential.");
+        }
+
+        return toast.error(error.message);
+      }
+
+      toast.error("There was an error. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   const isSignIn = type === "sign-in";
 
   return (
@@ -174,6 +222,18 @@ export default function AuthForm({ type }: { type: FormType }) {
             </Button>
           </form>
         </Form>
+
+        {isSignIn && (
+          <Button
+            type="button"
+            onClick={loginDemoUser}
+            className="btn-demo"
+            disabled={isLoading}
+            variant="secondary"
+          >
+            {isLoading ? "Loading..." : "Demo user"}
+          </Button>
+        )}
 
         <p className="text-center">
           {isSignIn ? "No account yet?" : "Have an account already?"}
