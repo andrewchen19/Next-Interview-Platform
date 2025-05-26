@@ -74,7 +74,10 @@ export default async function InterviewCard({
           <div className="flex flex-row justify-between">
             <DisplayTechIcons techStack={techStack} />
 
-            <Button asChild className="btn-primary">
+            <Button
+              asChild
+              className={feedback ? "btn-secondary" : "btn-primary"}
+            >
               <Link
                 href={
                   feedback ? `/interview/${id}/feedback` : `/interview/${id}`
