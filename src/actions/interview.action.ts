@@ -44,7 +44,7 @@ export async function getInterviewsByUserId(
 export async function getOthersInterviews(
   params: GetOthersInterviewsParams
 ): Promise<Interview[] | null> {
-  const { userId, limit = 8 } = params;
+  const { userId, limit = 9 } = params;
 
   try {
     const interviews = await db
