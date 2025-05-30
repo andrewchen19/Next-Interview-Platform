@@ -93,12 +93,15 @@ export const mappings = {
   contentful: "contentful",
   netlify: "netlify",
   vercel: "vercel",
-  "aws amplify": "amplify",
   java: "java",
   flutter: "flutter",
   ruby: "ruby",
   swift: "swift",
   python: "python",
+  kotlin: "kotlin",
+  canva: "canva",
+  go: "go",
+  solidity: "solidity",
 };
 
 // assistant’s configuration
