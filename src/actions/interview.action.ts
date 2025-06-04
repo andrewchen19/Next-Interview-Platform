@@ -25,6 +25,11 @@ export async function getInterviewById(id: string): Promise<Interview | null> {
 export async function getInterviewsByUserId(
   userId: string
 ): Promise<Interview[] | null> {
+  if (!userId) {
+    console.warn("getInterviewsByUserId: userId is undefined");
+    return null;
+  }
+
   try {
     const interviews = await db
       .collection("interviews")
@@ -36,7 +41,8 @@ export async function getInterviewsByUserId(
       id: doc.id,
       ...doc.data(),
     })) as Interview[];
-  } catch {
+  } catch (error) {
+    console.log(error);
     return null;
   }
 }
@@ -45,6 +51,11 @@ export async function getOthersInterviews(
   params: GetOthersInterviewsParams
 ): Promise<Interview[] | null> {
   const { userId, limit = 9 } = params;
+
+  if (!userId) {
+    console.warn("getOthersInterviews: userId is undefined");
+    return null;
+  }
 
   try {
     const interviews = await db
